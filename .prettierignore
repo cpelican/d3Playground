@@ -1,0 +1,11 @@
+build
+public
+node_modules
+manifest.json
+package-lock.json
+README.md
+tsconfig.json
+.prettierrc.json
+package.json
+*.html
+*.css
