@@ -20,35 +20,30 @@ let dataFx: CircleData[] = [
     {size: 29, cX: 140, cY: 220},
 ];
 
-interface AppProps {
-    data?: CircleData[];
-}
-
 function StellarBodiesApp({data = dataFx}: AppProps) {
     const [error, setError] = useState<string>(''),
-        [stellarBodies, setStellarBodies] = useState<StellarBody[]>([]);
+        [planets, setPlanets] = useState<StellarBody[]>([]);
 
-    function filterPlanets(bodies: StellarBody[]) {
+    function filterPlanets(bodies: StellarBody[]): StellarBody[] {
         return bodies.filter((b: StellarBody) => b.isPlanet);
     }
 
     useEffect(() => {
         let container = document.querySelector('.app-container'),
-            svgElement = document.querySelector('.app-container svg');
+            svgElement = container?.querySelector('svg');
 
-        if (stellarBodies.length === 0) {
+        if (planets.length === 0) {
             fetchSolarSystem()
                 .then((bodies: StellarBody[]) => {
                     let planets = filterPlanets(bodies);
-                    console.log(planets);
-                    setStellarBodies(planets);
+                    setPlanets(planets);
                 })
                 .catch((e: Error) => {
                     setError(e.message);
                 });
         }
 
-        if (container != null && svgElement == null && stellarBodies?.length > 0) {
+        if (container != null && svgElement == null && planets?.length > 0) {
             buildStars(container, data);
         }
     });
