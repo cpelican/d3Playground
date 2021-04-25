@@ -1,50 +1,52 @@
 import React, {useEffect, useState} from 'react';
-import {StellarBody, Vol} from './StellarBodiesTypes';
+import {StellarBody} from './StellarBodiesTypes';
 import {fetchSolarSystem} from './fetchers';
-import {buildStars} from './svgBuilders';
+import {buildPlanets, buildSun, createBackGround} from './svgBuilders';
 
-export interface CircleData {
-    size: number;
-    cX: number;
-    cY: number;
-    vol?: Vol;
-}
-
-interface AppProps {
-    data?: CircleData[];
-}
-
-let dataFx: CircleData[] = [
-    {size: 140, cX: 80, cY: 20},
-    {size: 50, cX: 200, cY: 300},
-    {size: 29, cX: 140, cY: 220},
-];
-
-function StellarBodiesApp({data = dataFx}: AppProps) {
+function StellarBodiesApp() {
     const [error, setError] = useState<string>(''),
-        [planets, setPlanets] = useState<StellarBody[]>([]);
+        [bodies, setBodies] = useState<StellarBody[]>([]);
 
-    function filterPlanets(bodies: StellarBody[]): StellarBody[] {
-        return bodies.filter((b: StellarBody) => b.isPlanet);
+    function removeSatellites(bodies: StellarBody[]): StellarBody[] {
+        return bodies.filter((b: StellarBody) => b.isPlanet || b.id === 'soleil');
     }
 
     useEffect(() => {
         let container = document.querySelector('.app-container'),
             svgElement = container?.querySelector('svg');
 
-        if (planets.length === 0) {
+        if (bodies.length === 0) {
             fetchSolarSystem()
                 .then((bodies: StellarBody[]) => {
-                    let planets = filterPlanets(bodies);
-                    setPlanets(planets);
+                    let stellarBodies = removeSatellites(bodies);
+                    setBodies(stellarBodies);
                 })
                 .catch((e: Error) => {
                     setError(e.message);
                 });
         }
 
-        if (container != null && svgElement == null && planets?.length > 0) {
-            buildStars(container, data);
+        if (container && svgElement == null && bodies?.length > 0) {
+            createBackGround(container);
+
+            let sun: StellarBody | null = null,
+                planets: StellarBody[] = [];
+
+            bodies.forEach((b: StellarBody) => {
+                if (b.id === 'soleil') {
+                    sun = b;
+                    return;
+                }
+                planets.push(b);
+            });
+
+            if (sun != null) {
+                buildSun(container, sun);
+                let solarCircle: SVGCircleElement | null = container.querySelector(`svg .${sun!.id}`),
+                    solarSize = solarCircle?.r.animVal?.value ?? 0;
+
+                buildPlanets(container, planets, solarSize);
+            }
         }
     });
 
