@@ -1,38 +1,103 @@
 import * as d3 from 'd3';
 import {StellarBody} from './StellarBodiesTypes';
-import {computePosition} from './utils';
+import {getEllipseXPosition, getEllipseYPosition, getPlanetRadius} from './utils';
 
-export function createBackGround(container: Element) {
-    d3.select(container).append('svg').attr('width', '100%').attr('height', '100vh').style('background-color', 'black');
+const WIDTH = 800;
+
+export function createSvgContainer(container: Element) {
+    d3.select(container).append('svg').attr('width', `${WIDTH}px`).attr('height', `${WIDTH}px`).style('background-color', 'black');
 }
 
-export function buildSun(container: Element, data: StellarBody) {
-    let {height, width} = container.getBoundingClientRect(),
-        centerX = width / 2,
-        centerY = height / 2;
+export function computeSunRadius(data: StellarBody): number {
+    return Math.floor(data.meanRadius / 10000);
+}
 
-    d3.select(container.querySelector('svg'))
+function getSvgContainerCenter(container: SVGSVGElement): [number, number] {
+    let width: number = (container?.width.baseVal.value ?? 0),
+            heigth: number = (container?.height.baseVal.value ?? 0),
+            centerX =  width / 2,
+            centerY = heigth / 2;
+    return [centerX, centerY];
+}
+
+export function buildSun(container: SVGSVGElement, data: StellarBody) {
+    let [centerX, centerY] = getSvgContainerCenter(container);
+
+    d3.select(container)
+        .append('defs')
+        .append('filter')
+        .attr('id', 'shadow')
+        .append('feDropShadow')
+        .attr('dx', 0)
+        .attr('dy', 0)
+        .attr('stdDeviation', 15)
+        .attr('flood-color', 'yellow')
+        .attr('flood-opacity', 1);
+
+    d3.select(container)
         .append('circle')
-        .attr('cx', () => computePosition(data, centerX, 0))
-        .attr('cy', () => computePosition(data, centerY, 0))
-        .attr('r', () => Math.floor(data.meanRadius / 10000))
-        .attr('class', data.id)
+        .attr('cx', centerX)
+        .attr('cy', centerY)
+        .attr('r', () => computeSunRadius(data))
+        .attr('class', () => createClassName(data))
+        .attr('style', 'filter: url(#shadow)')
         .style('fill', 'yellow');
+
 }
 
-export function buildPlanets(container: Element, data: StellarBody[], sunRadius: number) {
-    let {height, width} = container.getBoundingClientRect(),
-        centerX = Math.floor(width / 2),
-        centerY = Math.floor(height / 2);
+// export function buildOrbitsAsPaths(container: SVGSVGElement, data: StellarBody[], sunRadius: number) {
+//     let [centerX, centerY] = getSvgContainerCenter(container);
+//
+//     d3.select(container)
+//         .selectAll('path')
+//         .data(data)
+//         .enter()
+//         .append('path')
+//         .attr('id', (d: StellarBody) => `orbit-${d.id}`)
+//         .style('fill', 'none')
+//         .style('stroke-width', 1)
+//         .style('stroke', 'red')
+//         .attr('d', (d: StellarBody) => (computeDPath(d, centerX, centerY, sunRadius)))
+// }
 
-    d3.select(container.querySelector('svg'))
+export function buildPlanetsOnOrbits(container: SVGSVGElement, data: StellarBody[], sunRadius: number) {
+    let [centerX, centerY] = getSvgContainerCenter(container);
+
+    d3.select(container)
         .selectAll('circle')
         .data(data)
         .enter()
         .append('circle')
-        .attr('cx', (d: StellarBody) => computePosition(d, centerX, sunRadius))
-        .attr('cy', (d: StellarBody) => computePosition(d, centerY, sunRadius))
-        .attr('r', (d: StellarBody) => (Math.floor(d.meanRadius / 10000) === 0 ? 1 : Math.floor(d.meanRadius / 10000)))
-        .attr('class', (d: StellarBody) => d.id)
-        .style('fill', 'white');
+        .attr('r', (d: StellarBody) => getPlanetRadius(d.meanRadius))
+        .attr('cx', (d: StellarBody) => getEllipseXPosition(d, centerX, sunRadius, 0))
+        .attr('cy', (d: StellarBody) => getEllipseYPosition(d, centerY, sunRadius, 0))
+        .attr('class', createClassName)
+        .attr('transform-origin', `${centerX}px ${centerY}px`)
+        .style('fill', 'white')
+        .each(cycle);
+}
+
+function cycle(d: StellarBody) {
+    d3.select(`circle.${d.id}`)
+        .transition()
+        .duration(() => createDuration(d))
+        .delay(0)
+        .ease(d3.easeLinear)
+        .attrTween('transform', () => d3.interpolateString("rotate(0)", "rotate(360)"))
+        .on('end', () => cycle(d));
+}
+
+function createClassName(d: StellarBody): string {
+    console.log(d);
+    if (d.id === 'soleil') {
+        return d.id;
+    }
+    return `${d.id} planet`
+}
+
+function createDuration(d: StellarBody): number {
+    if (d.id === 'soleil') {
+        return 0;
+    }
+    return Math.floor((400/73) * d.sideralOrbit);
 }

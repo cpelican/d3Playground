@@ -1,7 +1,8 @@
 import React, {useEffect, useState} from 'react';
+
 import {StellarBody} from './StellarBodiesTypes';
+import {buildPlanetsOnOrbits, buildSun, createSvgContainer} from './svgBuilders';
 import {fetchSolarSystem} from './fetchers';
-import {buildPlanets, buildSun, createBackGround} from './svgBuilders';
 
 function StellarBodiesApp() {
     const [error, setError] = useState<string>(''),
@@ -27,7 +28,7 @@ function StellarBodiesApp() {
         }
 
         if (container && svgElement == null && bodies?.length > 0) {
-            createBackGround(container);
+            createSvgContainer(container);
 
             let sun: StellarBody | null = null,
                 planets: StellarBody[] = [];
@@ -39,13 +40,14 @@ function StellarBodiesApp() {
                 }
                 planets.push(b);
             });
+            svgElement = container?.querySelector('svg');
 
-            if (sun != null) {
-                buildSun(container, sun);
+            if (sun != null && svgElement != null) {
+                buildSun(svgElement, sun);
                 let solarCircle: SVGCircleElement | null = container.querySelector(`svg .${sun!.id}`),
                     solarSize = solarCircle?.r.animVal?.value ?? 0;
 
-                buildPlanets(container, planets, solarSize);
+                buildPlanetsOnOrbits(svgElement, planets, solarSize)
             }
         }
     });
