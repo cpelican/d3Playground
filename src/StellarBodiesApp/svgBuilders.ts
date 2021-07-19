@@ -1,15 +1,11 @@
 import * as d3 from 'd3';
 import {StellarBody} from './StellarBodiesTypes';
-import {getEllipseXPosition, getEllipseYPosition, getPlanetRadius} from './utils';
+import {computeSunRadius, getEllipseXPosition, getEllipseYPosition, computePlanetRadius} from './utils';
 
 const WIDTH = 800;
 
 export function createSvgContainer(container: Element) {
     d3.select(container).append('svg').attr('width', `${WIDTH}px`).attr('height', `${WIDTH}px`).style('background-color', 'black');
-}
-
-export function computeSunRadius(data: StellarBody): number {
-    return Math.floor(data.meanRadius / 10000);
 }
 
 function getSvgContainerCenter(container: SVGSVGElement): [number, number] {
@@ -45,21 +41,6 @@ export function buildSun(container: SVGSVGElement, data: StellarBody) {
 
 }
 
-// export function buildOrbitsAsPaths(container: SVGSVGElement, data: StellarBody[], sunRadius: number) {
-//     let [centerX, centerY] = getSvgContainerCenter(container);
-//
-//     d3.select(container)
-//         .selectAll('path')
-//         .data(data)
-//         .enter()
-//         .append('path')
-//         .attr('id', (d: StellarBody) => `orbit-${d.id}`)
-//         .style('fill', 'none')
-//         .style('stroke-width', 1)
-//         .style('stroke', 'red')
-//         .attr('d', (d: StellarBody) => (computeDPath(d, centerX, centerY, sunRadius)))
-// }
-
 export function buildPlanetsOnOrbits(container: SVGSVGElement, data: StellarBody[], sunRadius: number) {
     let [centerX, centerY] = getSvgContainerCenter(container);
 
@@ -68,7 +49,7 @@ export function buildPlanetsOnOrbits(container: SVGSVGElement, data: StellarBody
         .data(data)
         .enter()
         .append('circle')
-        .attr('r', (d: StellarBody) => getPlanetRadius(d.meanRadius))
+        .attr('r', (d: StellarBody) => computePlanetRadius(d.meanRadius))
         .attr('cx', (d: StellarBody) => getEllipseXPosition(d, centerX, sunRadius, 0))
         .attr('cy', (d: StellarBody) => getEllipseYPosition(d, centerY, sunRadius, 0))
         .attr('class', createClassName)
@@ -88,7 +69,6 @@ function cycle(d: StellarBody) {
 }
 
 function createClassName(d: StellarBody): string {
-    console.log(d);
     if (d.id === 'soleil') {
         return d.id;
     }
@@ -99,5 +79,5 @@ function createDuration(d: StellarBody): number {
     if (d.id === 'soleil') {
         return 0;
     }
-    return Math.floor((400/73) * d.sideralOrbit);
+    return Math.floor((400 / 73) * d.sideralOrbit);
 }
