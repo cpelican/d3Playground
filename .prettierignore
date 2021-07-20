@@ -6,6 +6,7 @@ package-lock.json
 README.md
 tsconfig.json
 .prettierrc.json
+bodies.json
 package.json
 *.html
 *.css

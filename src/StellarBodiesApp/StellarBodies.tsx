@@ -17,13 +17,15 @@ export const StellarBodies = ({sun, planets, width, heigth}: StellarBodiesProps)
     const svgRef = useRef(null);
 
     useEffect(() => {
-        let svgElement: SVGElementOrNull = svgRef?.current;
-        if (svgElement != null && planets?.length > 0 && sun != null) {
-                buildSun(svgElement, sun);
-                let sunElement: SVGCircleElement | null = svgElement!.querySelector(`.${sun!.id}`),
-                    sunRadius = sunElement?.r.animVal?.value ?? 0;
+        let svgElement: SVGElementOrNull = svgRef?.current,
+            hasAllStellarBodies = sun != null && (planets?.length ?? 0) > 0;
 
-                buildPlanetsOnOrbits(svgElement, planets, sunRadius)
+        if (svgElement != null && hasAllStellarBodies) {
+            buildSun(svgElement, sun as StellarBody);
+            let sunElement: SVGCircleElement | null = svgElement!.querySelector(`.${sun!.id}`),
+                sunRadius = sunElement?.r.animVal?.value ?? 0;
+
+            buildPlanetsOnOrbits(svgElement, planets, sunRadius);
         }
     }, [planets, sun]);
 

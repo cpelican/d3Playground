@@ -12,22 +12,23 @@ export const useStellarBodiesApi = (): UseStellarBodiesApiType => {
 
     function separateSunFromPlanets(bodies: StellarBody[]): [StellarBody | null, StellarBody[]] {
         let sun: StellarBody | null = null,
-                planets: StellarBody[] = [];
+            planets: StellarBody[] = [];
 
-            bodies.forEach((b: StellarBody) => {
-                if (b.id === 'soleil') {
-                    sun = b;
-                    return;
-                }
-                if (b.isPlanet) {
-                    planets.push(b);
-                }
-            });
+        bodies.forEach((b: StellarBody) => {
+            if (b.id === 'soleil') {
+                sun = b;
+                return;
+            }
+            if (b.isPlanet) {
+                planets.push(b);
+            }
+        });
         return [sun, planets];
     }
 
     useEffect(() => {
-        if ((sun == null && (planets?.length ?? 0) === 0) && !isLoading) {
+        let hasSomeStellarBodies = sun != null || (planets?.length ?? 0) > 0;
+        if (!hasSomeStellarBodies && !isLoading) {
             setIsLoading(true);
             fetchSolarSystem()
                 .then((bodies: StellarBody[]) => {
@@ -40,8 +41,7 @@ export const useStellarBodiesApi = (): UseStellarBodiesApiType => {
                 })
                 .finally(() => setIsLoading(false));
         }
+    }, [planets, sun]);
 
-  }, [planets, sun]);
-
-  return [planets, sun, isLoading, error];
+    return [planets, sun, isLoading, error];
 };

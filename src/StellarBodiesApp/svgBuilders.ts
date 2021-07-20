@@ -4,7 +4,7 @@ import {
     computeEllipseXPosition,
     computeEllipseYPosition,
     computeStellarObjectRadius,
-    computeSvgContainerCenter
+    computeSvgContainerCenter,
 } from './utils';
 
 export function buildSun(container: SVGSVGElement, data: StellarBody) {
@@ -31,7 +31,6 @@ export function buildSun(container: SVGSVGElement, data: StellarBody) {
         .attr('style', 'filter: url(#shadow)')
         .style('fill', 'yellow')
         .style('overflow', 'visible');
-
 }
 
 export function buildPlanetsOnOrbits(container: SVGSVGElement, data: StellarBody[], sunRadius: number) {
@@ -56,7 +55,7 @@ function buildAnimation(d: StellarBody) {
         .duration(() => createDuration(d))
         .delay(0)
         .ease(d3.easeLinear)
-        .attrTween('transform', () => d3.interpolateString("rotate(0)", "rotate(360)"))
+        .attrTween('transform', () => d3.interpolateString('rotate(0)', 'rotate(360)'))
         .on('end', () => buildAnimation(d));
 }
 
@@ -64,7 +63,7 @@ function createClassName(d: StellarBody): string {
     if (d.id === 'soleil') {
         return d.id;
     }
-    return `${d.id} planet`
+    return `${d.id} planet`;
 }
 
 function createDuration(d: StellarBody): number {
