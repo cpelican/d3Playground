@@ -1,9 +1,8 @@
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 
-import {StellarBody} from './StellarBodiesTypes';
-import {buildPlanetsOnOrbits, buildSun, buildSvgContainer} from './svgBuilders';
-import {fetchSolarSystem} from './fetchers';
 import {Loader} from './Loader';
+import {useStellarBodiesApi} from './hooks';
+import {StellarBodies} from './StellarBodies';
 
 
 export const ViewConfig = {
@@ -16,26 +15,7 @@ export const ViewConfig = {
 };
 
 function StellarBodiesApp() {
-    const [error, setError] = useState<string>(''),
-        [isLoading, setIsLoading] = useState<boolean>(false),
-        [planets, setPlanets] = useState<StellarBody[]>([]),
-        [sun, setSun] = useState<StellarBody | null>(null);
-
-    function separateSunFromPlanets(bodies: StellarBody[]): [StellarBody | null, StellarBody[]] {
-        let sun: StellarBody | null = null,
-                planets: StellarBody[] = [];
-
-            bodies.forEach((b: StellarBody) => {
-                if (b.id === 'soleil') {
-                    sun = b;
-                    return;
-                }
-                if (b.isPlanet) {
-                    planets.push(b);
-                }
-            });
-        return [sun, planets];
-    }
+    const [planets, sun, isLoading, error] = useStellarBodiesApi();
 
     function getContent(): React.ReactNode {
         if (error !== '') {
@@ -50,41 +30,10 @@ function StellarBodiesApp() {
             )
         }
 
-        return null;
+        return (
+            <StellarBodies sun={sun} planets={planets} width={ViewConfig.width} heigth={ViewConfig.height}/>
+        );
     }
-
-    useEffect(() => {
-        let container = document.querySelector(`.${ViewConfig.name}`),
-            svgElement = container?.querySelector('svg');
-
-        if (planets.length === 0) {
-            setIsLoading(true);
-            fetchSolarSystem()
-                .then((bodies: StellarBody[]) => {
-                    let [sun, planets] = separateSunFromPlanets(bodies);
-                    setSun(sun);
-                    setPlanets(planets);
-                })
-                .catch((e: Error) => {
-                    setError(e.message);
-                })
-                .finally(() => setIsLoading(false));
-        }
-
-        if (container && svgElement == null && planets?.length > 0) {
-            buildSvgContainer(container);
-
-            svgElement = container?.querySelector('svg');
-
-            if (sun != null && svgElement != null) {
-                buildSun(svgElement, sun);
-                let sunElement: SVGCircleElement | null = container.querySelector(`svg .${sun!.id}`),
-                    sunRadius = sunElement?.r.animVal?.value ?? 0;
-
-                buildPlanetsOnOrbits(svgElement, planets, sunRadius)
-            }
-        }
-    }, [planets, sun]);
 
 
     return <div className={`stellar-body-container ${ViewConfig.name}`} >{getContent()}</div>;

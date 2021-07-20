@@ -6,15 +6,6 @@ import {
     computeStellarObjectRadius,
     computeSvgContainerCenter
 } from './utils';
-import {ViewConfig} from './index';
-
-export function buildSvgContainer(container: Element) {
-    d3.select(container)
-        .append('svg')
-        .attr('width', ViewConfig.width)
-        .attr('height', ViewConfig.height)
-        .style('background-color', 'black');
-}
 
 export function buildSun(container: SVGSVGElement, data: StellarBody) {
     let [centerX, centerY] = computeSvgContainerCenter(container);
