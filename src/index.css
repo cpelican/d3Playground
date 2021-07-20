@@ -2,8 +2,19 @@ body {
   margin: 0;
   background: black;
 }
-.app-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.stellar-body-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
 }
+
+.loading-container, .error-message {
+    color: white;
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: large;
+}
+

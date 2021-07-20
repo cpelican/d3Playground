@@ -1,7 +1,7 @@
-const SOLAR_SYSTEM_API_URL: string = 'https://api.le-systeme-solaire.net/rest/bodies/';
+import {ViewConfig} from './index';
 
 export async function fetchSolarSystem() {
-    const response = await fetch(SOLAR_SYSTEM_API_URL, {
+    const response = await fetch(ViewConfig.url, {
         method: 'GET',
     });
 
