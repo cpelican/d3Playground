@@ -2,6 +2,7 @@ body {
   margin: 0;
   background: black;
 }
+
 .stellar-body-container {
     display: flex;
     justify-content: center;

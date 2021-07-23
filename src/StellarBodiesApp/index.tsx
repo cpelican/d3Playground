@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 
 import {Loader} from './Loader';
 import {useStellarBodiesApi} from './hooks';
@@ -7,9 +7,15 @@ import {StellarBodies} from './StellarBodies';
 export const ViewConfig = {
     url: 'https://api.le-systeme-solaire.net/rest/bodies/',
     name: 'app-container',
-    width: '100%',
-    height: '100vh',
-    scale: 20000000,
+    width: '900',
+    height: '900',
+    scale: 2000000,
+    maxZoom: 6.57,
+    minZoom: 0.007,
+    // todo: fix the 0
+    rotationSpeed: 1,
+    translateX: 0,
+    translateY: 0,
     minimalPlanetSize: 2,
 };
 
@@ -25,7 +31,18 @@ function StellarBodiesApp() {
             return <Loader message='Fetching from the API' />;
         }
 
-        return <StellarBodies sun={sun} planets={planets} width={ViewConfig.width} heigth={ViewConfig.height} />;
+        return (
+            <StellarBodies
+                sun={sun}
+                planets={planets}
+                width={ViewConfig.width}
+                heigth={ViewConfig.height}
+                scale={ViewConfig.scale}
+                maxZoom={ViewConfig.maxZoom}
+                minZoom={ViewConfig.minZoom}
+                rotationSpeed={ViewConfig.rotationSpeed}
+            />
+        );
     }
 
     return <div className={`stellar-body-container ${ViewConfig.name}`}>{getContent()}</div>;
